@@ -1,6 +1,11 @@
+import { LEADING_TRIVIA_CHARS } from '@angular/compiler/src/render3/view/template';
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { Chart, registerables } from 'node_modules/chart.js';
-import { DataServiseService } from 'src/app/data-servise.service';
+import {
+  DataServiseService,
+  IJsonDataItem,
+  IParsedDataItem,
+} from 'src/app/data-servise.service';
 
 import * as Utils from '../../../app/utils';
 // import  * as Utils  from 'chart.js/types/utils'
@@ -13,54 +18,88 @@ Chart.register(...registerables);
 export class LineChartComponent implements OnInit {
   canvas: any;
   cxt: any;
- 
+  line1: any = '';
   @ViewChild('canvasRef', { static: false }) canvasRef: ElementRef;
 
-  labels = [1,2,3,4,5];
-  
+  labels = [1, 2, 3, 4, 5];
 
-  datasets = [
+  datasets: IJsonDataItem[] = [
     {
-      label: 'My Fourth dataset',
-      data: this.dataService.dataLine4(),
+      id: 1,
+      label: 'My First dataset',
+      data: [],
+      // data: this.dataService.dataLine4(),
       borderColor: Utils.CHART_COLORS.green,
       backgroundColor: Utils.CHART_COLORS.green,
       fill: true,
     },
     {
-      label: 'My Third dataset',
-      data: this.dataService.dataLine3(),
+      id: 2,
+      label: 'My Second dataset',
+      data: [],
+      // data: this.dataService.dataLine3(),
       borderColor: Utils.CHART_COLORS.yellow,
       backgroundColor: Utils.CHART_COLORS.yellow,
       fill: true,
     },
- 
+
     {
-      label: 'My Second dataset',
-      data: this.dataService.dataLine2(),
+      id: 3,
+      label: 'My Third dataset',
+      data: [],
+      // data: this.dataService.dataLine2(),
       borderColor: Utils.CHART_COLORS.red,
       backgroundColor: Utils.CHART_COLORS.red,
       fill: true,
     },
-      {
-      label: 'My First dataset',
-      data: this.dataService.dataLine1(),
+    {
+      id: 4,
+      label: 'My Fourth dataset',
+      data: [],
+      // data: this.dataService.dataLine1(),
       borderColor: Utils.CHART_COLORS.blue,
       backgroundColor: Utils.CHART_COLORS.blue,
       fill: true,
-    }
+    },
   ];
 
-  constructor(private dataService:DataServiseService) {}
+  constructor(private dataService: DataServiseService) {}
 
   ngOnInit(): void {
-    // this.createLineChart(this.datasets,this.labels,"lineChart")
+    this.dataService.getFileData$().subscribe((dataLine: IParsedDataItem[]) => {
+      // this.dataService.dataLine1();
+      dataLine.forEach((line) => {
+        let item;
+        switch (line.prevOrders) {
+          case '1':
+            item = this.datasets.find((i) => i.id === 4);
+            item.data.push(line.ltvLift);
+            break;
+          case '2':
+            item = this.datasets.find((i) => i.id === 3);
+            item.data.push(line.ltvLift);
+            break;
+          case '3':
+            item = this.datasets.find((i) => i.id === 2);
+            item.data.push(line.ltvLift);
+            break;
+          case '4+':
+            item = this.datasets.find((i) => i.id === 1);
+            item.data.push(line.ltvLift);
+            break;
+        }
+      });
 
+      // this.datasets.forEach((item: IJsonDataItem) => {
+      //   // if ()
+      //   item;
+      //   dataLine;
+      // });
+    });
   }
 
   ngAfterViewInit() {
     this.createLineChart(this.datasets, this.labels, 'lineChart');
-    
   }
 
   private createLineChart(datasets, labels, idChart) {
@@ -78,17 +117,20 @@ export class LineChartComponent implements OnInit {
         plugins: {
           title: {
             display: true,
-            text: 'Chart.js Line Chart',
+            text: 'Line Chart Task',
           },
           tooltip: {
-            // mode: 'index',
-            // callbacks:{
-      
-            //     label:function(item,everithing){
-                    
-            //     }
-      
-            // }
+            callbacks: {
+              // label:function () {
+
+              //   return "string"
+              // },
+              footer: function () {
+                let value = 'This is footer';
+                return value;
+              },
+            },
+            mode: 'index',
           },
         },
         interaction: {
@@ -97,7 +139,6 @@ export class LineChartComponent implements OnInit {
           intersect: false,
         },
         scales: {
-         
           y: {
             stacked: false,
             title: {
