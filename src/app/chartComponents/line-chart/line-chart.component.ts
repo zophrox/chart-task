@@ -1,11 +1,17 @@
 import { LEADING_TRIVIA_CHARS } from '@angular/compiler/src/render3/view/template';
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  ElementRef,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
 import { Chart, registerables } from 'node_modules/chart.js';
 import {
-  DataServiseService,
+  DataService,
   IJsonDataItem,
   IParsedDataItem,
-} from 'src/app/data-servise.service';
+} from 'src/app/data.service';
 
 import * as Utils from '../../../app/utils';
 // import  * as Utils  from 'chart.js/types/utils'
@@ -16,19 +22,17 @@ Chart.register(...registerables);
   styleUrls: ['./line-chart.component.scss'],
 })
 export class LineChartComponent implements OnInit {
-  canvas: any;
-  cxt: any;
-  line1: any = '';
+  // canvas: any;
+  // cxt: any;
   @ViewChild('canvasRef', { static: false }) canvasRef: ElementRef;
 
   labels = [1, 2, 3, 4, 5];
 
-  datasets: IJsonDataItem[] = [
+  public datasets: IJsonDataItem[] = [
     {
       id: 1,
       label: 'My First dataset',
       data: [],
-      // data: this.dataService.dataLine4(),
       borderColor: Utils.CHART_COLORS.green,
       backgroundColor: Utils.CHART_COLORS.green,
       fill: true,
@@ -37,7 +41,6 @@ export class LineChartComponent implements OnInit {
       id: 2,
       label: 'My Second dataset',
       data: [],
-      // data: this.dataService.dataLine3(),
       borderColor: Utils.CHART_COLORS.yellow,
       backgroundColor: Utils.CHART_COLORS.yellow,
       fill: true,
@@ -47,7 +50,6 @@ export class LineChartComponent implements OnInit {
       id: 3,
       label: 'My Third dataset',
       data: [],
-      // data: this.dataService.dataLine2(),
       borderColor: Utils.CHART_COLORS.red,
       backgroundColor: Utils.CHART_COLORS.red,
       fill: true,
@@ -56,18 +58,25 @@ export class LineChartComponent implements OnInit {
       id: 4,
       label: 'My Fourth dataset',
       data: [],
-      // data: this.dataService.dataLine1(),
       borderColor: Utils.CHART_COLORS.blue,
       backgroundColor: Utils.CHART_COLORS.blue,
       fill: true,
     },
   ];
 
-  constructor(private dataService: DataServiseService) {}
+  constructor(private dataService: DataService) {}
 
   ngOnInit(): void {
+    this.getDataLine();
+  }
+
+  ngAfterViewInit() {
+    // this.createLineChart(this.datasets, this.labels, 'lineChart');
+  }
+
+  getDataLine() {
     this.dataService.getFileData$().subscribe((dataLine: IParsedDataItem[]) => {
-      // this.dataService.dataLine1();
+      this.datasets.forEach((e) => (e.data = []));
       dataLine.forEach((line) => {
         let item;
         switch (line.prevOrders) {
@@ -90,23 +99,20 @@ export class LineChartComponent implements OnInit {
         }
       });
 
-      // this.datasets.forEach((item: IJsonDataItem) => {
-      //   // if ()
-      //   item;
-      //   dataLine;
-      // });
+      this.createLineChart(this.datasets, this.labels);
     });
   }
-
-  ngAfterViewInit() {
-    this.createLineChart(this.datasets, this.labels, 'lineChart');
-  }
-
-  private createLineChart(datasets, labels, idChart) {
+  chart;
+  private createLineChart(datasets, labels) {
+    if (this.chart) {
+      this.chart.destroy();
+      this.chart = null;
+    }
     // this.canvas = document.getElementById(idChart);
-    this.canvas = this.canvasRef.nativeElement;
-    this.cxt = this.canvas.getContext('2d');
-    let chart = new Chart(this.cxt, {
+    const canvas = this.canvasRef.nativeElement;
+    const cxt = canvas.getContext('2d');
+
+    const config: any = {
       type: 'line',
       data: {
         labels: labels,
@@ -148,6 +154,8 @@ export class LineChartComponent implements OnInit {
           },
         },
       },
-    });
+    };
+
+    this.chart = new Chart(cxt, config);
   }
 }
