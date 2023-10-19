@@ -120,7 +120,6 @@ export class LineChartComponent implements OnInit {
       this.chart.destroy();
       this.chart = null;
     }
-    // this.canvas = document.getElementById(idChart);
     const canvas = this.canvasRef.nativeElement;
     const cxt = canvas.getContext('2d');
 
@@ -139,10 +138,6 @@ export class LineChartComponent implements OnInit {
           },
           tooltip: {
             callbacks: {
-              // label:function () {
-
-              //   return "string"
-              // },
               footer: function () {
                 let value = 'This is footer';
                 return value;
