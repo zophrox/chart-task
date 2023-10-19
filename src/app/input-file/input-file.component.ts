@@ -12,16 +12,13 @@ export class InputFileComponent implements OnInit {
   @ViewChild('inputRef', {static: false}) inputRef: ElementRef;
   constructor(private dataService:DataService) {}
 
-  ngOnInit(): void {
-  
-  }
+  ngOnInit(): void {}
 
   saveJsonDataAsObject(event): void {
     this.data = event.target.result;
     const parsedData = JSON.parse(this.data);
     this.dataService.setFileData$(parsedData);
     this.inputRef.nativeElement.value = '';
-    console.log(JSON.parse(this.data))
   }
 
   fileData(event) {
